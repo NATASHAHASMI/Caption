@@ -70,11 +70,21 @@ def edit_caption(bot, update: pyrogram.types.Message):
     if update.from_user and update.from_user.id in user_captions:
         try:
             user_caption = user_captions[update.from_user.id]
-            update.edit(user_caption.format(file_name=motech.file_name))
+            caption_text = user_caption.format(file_name=motech.file_name)
+            bot.edit_message_caption(
+                chat_id=update.chat.id,
+                message_id=update.message_id,
+                caption=caption_text
+            )
         except pyrogram.errors.FloodWait as FloodWait:
             asyncio.sleep(FloodWait.value)
             user_caption = user_captions[update.from_user.id]
-            update.edit(user_caption.format(file_name=motech.file_name))
+            caption_text = user_caption.format(file_name=motech.file_name)
+            bot.edit_message_caption(
+                chat_id=update.chat.id,
+                message_id=update.message_id,
+                caption=caption_text
+            )
         except pyrogram.errors.MessageNotModified:
             pass
 
