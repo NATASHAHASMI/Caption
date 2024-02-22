@@ -21,9 +21,6 @@ try:
 except Exception as dynamic_caption:
     print(f"⚠️ Dynamic Caption Invalid {dynamic_caption}")
 
-# Assuming you have a list of admin user IDs stored in your bot's variables
-admin_user_ids = [1843754190 , 1270043632]  # Replace with your actual admin user IDs
-
 AutoCaptionBotV1 = pyrogram.Client(
     name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
 
@@ -53,22 +50,14 @@ def about_callback(bot, update):
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]))
 def set_caption_command(bot, update):
-    # Check if the user is an administrator and has the correct admin ID
-    if (
-        update.from_user
-        and update.from_user.id in [admin.user.id for admin in bot.get_chat_members(update.chat.id, filter="administrators")]
-        and update.from_user.id in admin_user_ids
-    ):
-        # Extract the caption from the command
-        command_parts = update.text.split(" ", 1)
-        if len(command_parts) > 1:
-            global dynamic_caption
-            dynamic_caption = command_parts[1]
-            update.reply(f"Caption set to: {dynamic_caption}")
-        else:
-            update.reply("Please provide a caption.")
+    # Extract the caption from the command
+    command_parts = update.text.split(" ", 1)
+    if len(command_parts) > 1:
+        global dynamic_caption
+        dynamic_caption = command_parts[1]
+        update.reply(f"Caption set to: {dynamic_caption}")
     else:
-        update.reply("You need to be an administrator with the correct ID to set the caption.")
+        update.reply("Please provide a caption.")
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
@@ -92,6 +81,11 @@ def get_file_details(update: pyrogram.types.Message):
             "video",
             "video_note",
             "voice",
+            # "contact",
+            # "dice",
+            # "poll",
+            # "location",
+            # "venue",
             "sticker"
         ):
             obj = getattr(update, message_type)
@@ -102,3 +96,5 @@ print("Telegram AutoCaption V1 Bot Start")
 print("Bot Created By https://t.me/xayoonara")
 
 AutoCaptionBotV1.run()
+
+    
