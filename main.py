@@ -67,16 +67,14 @@ def set_caption_command(bot, update):
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
-    if update.from_user:
-        user_id = update.from_user.id
+    if update.from_user and update.from_user.id in user_captions:
         try:
-            try:
-                user_caption = user_captions.get(user_id, dynamic_caption)
-                update.edit(user_caption.format(file_name=motech.file_name))
-            except pyrogram.errors.FloodWait as FloodWait:
-                asyncio.sleep(FloodWait.value)
-                user_caption = user_captions.get(user_id, dynamic_caption)
-                update.edit(user_caption.format(file_name=motech.file_name))
+            user_caption = user_captions[update.from_user.id]
+            update.edit(user_caption.format(file_name=motech.file_name))
+        except pyrogram.errors.FloodWait as FloodWait:
+            asyncio.sleep(FloodWait.value)
+            user_caption = user_captions[update.from_user.id]
+            update.edit(user_caption.format(file_name=motech.file_name))
         except pyrogram.errors.MessageNotModified:
             pass
 
