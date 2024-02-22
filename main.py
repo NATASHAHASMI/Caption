@@ -52,29 +52,33 @@ def about_callback(bot, update):
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]))
 def set_caption_command(bot, update):
-    user_id = update.from_user.id
-    # Extract the caption from the command
-    command_parts = update.text.split(" ", 1)
-    if len(command_parts) > 1:
-        user_captions[user_id] = command_parts[1]
-        update.reply(f"Caption set to: {user_captions[user_id]}")
+    user_id = update.from_user.id if update.from_user else None
+    if user_id is not None:
+        # Extract the caption from the command
+        command_parts = update.text.split(" ", 1)
+        if len(command_parts) > 1:
+            user_captions[user_id] = command_parts[1]
+            update.reply(f"Caption set to: {user_captions[user_id]}")
+        else:
+            update.reply("Please provide a caption.")
     else:
-        update.reply("Please provide a caption.")
+        update.reply("Unable to identify user.")
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
-    user_id = update.from_user.id
-    try:
+    if update.from_user:
+        user_id = update.from_user.id
         try:
-            user_caption = user_captions.get(user_id, dynamic_caption)
-            update.edit(user_caption.format(file_name=motech.file_name))
-        except pyrogram.errors.FloodWait as FloodWait:
-            asyncio.sleep(FloodWait.value)
-            user_caption = user_captions.get(user_id, dynamic_caption)
-            update.edit(user_caption.format(file_name=motech.file_name))
-    except pyrogram.errors.MessageNotModified:
-        pass
+            try:
+                user_caption = user_captions.get(user_id, dynamic_caption)
+                update.edit(user_caption.format(file_name=motech.file_name))
+            except pyrogram.errors.FloodWait as FloodWait:
+                asyncio.sleep(FloodWait.value)
+                user_caption = user_captions.get(user_id, dynamic_caption)
+                update.edit(user_caption.format(file_name=motech.file_name))
+        except pyrogram.errors.MessageNotModified:
+            pass
 
 def get_file_details(update: pyrogram.types.Message):
     if update.media:
@@ -86,11 +90,6 @@ def get_file_details(update: pyrogram.types.Message):
             "video",
             "video_note",
             "voice",
-            # "contact",
-            # "dice",
-            # "poll",
-            # "location",
-            # "venue",
             "sticker"
         ):
             obj = getattr(update, message_type)
