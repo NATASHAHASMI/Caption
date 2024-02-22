@@ -21,6 +21,8 @@ try:
 except Exception as dynamic_caption:
     print(f"⚠️ Dynamic Caption Invalid {dynamic_caption}")
 
+user_captions = {}
+
 AutoCaptionBotV1 = pyrogram.Client(
     name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
 
@@ -50,24 +52,27 @@ def about_callback(bot, update):
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]))
 def set_caption_command(bot, update):
+    user_id = update.from_user.id
     # Extract the caption from the command
     command_parts = update.text.split(" ", 1)
     if len(command_parts) > 1:
-        global dynamic_caption
-        dynamic_caption = command_parts[1]
-        update.reply(f"Caption set to: {dynamic_caption}")
+        user_captions[user_id] = command_parts[1]
+        update.reply(f"Caption set to: {user_captions[user_id]}")
     else:
         update.reply("Please provide a caption.")
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
+    user_id = update.from_user.id
     try:
         try:
-            update.edit(dynamic_caption.format(file_name=motech.file_name))
+            user_caption = user_captions.get(user_id, dynamic_caption)
+            update.edit(user_caption.format(file_name=motech.file_name))
         except pyrogram.errors.FloodWait as FloodWait:
             asyncio.sleep(FloodWait.value)
-            update.edit(dynamic_caption.format(file_name=motech.file_name))
+            user_caption = user_captions.get(user_id, dynamic_caption)
+            update.edit(user_caption.format(file_name=motech.file_name))
     except pyrogram.errors.MessageNotModified:
         pass
 
@@ -96,4 +101,3 @@ print("Telegram AutoCaption V1 Bot Start")
 print("Bot Created By https://t.me/xayoonara")
 
 AutoCaptionBotV1.run()
-                  
