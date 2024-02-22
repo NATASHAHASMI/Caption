@@ -39,22 +39,7 @@ def strat_callback(bot, update):
 def about_callback(bot, update): 
   bot = bot.get_me()
   update.message.edit(about_message.format(version=pyrogram.__version__, username=bot.mention), reply_markup=about_buttons(bot, update.message), parse_mode=pyrogram.enums.ParseMode.HTML, disable_web_page_preview=True)
-
-# ... (your existing code)
-
-@AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["set_caption"]))
-def set_caption_command(bot, update):
-    # Check if the user has provided a custom caption
-    if update.text.split(" ", 1)[1]:
-        # Assuming the provided caption is in the format "/set_caption Your_Custom_Caption_Here"
-        new_caption = update.text.split(" ", 1)[1]
-        
-        # Save the new caption to the environment variable or your preferred storage method
-        os.environ["custom_caption"] = new_caption
-        update.reply(f"Caption set successfully: `{new_caption}`", parse_mode=pyrogram.enums.ParseMode.MARKDOWN)
-    else:
-        update.reply("Please provide a caption after the command. For example: `/set_caption Your_Custom_Caption_Here`", parse_mode=pyrogram.enums.ParseMode.MARKDOWN)
-
+ 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
   motech, _ = get_file_details(update)
