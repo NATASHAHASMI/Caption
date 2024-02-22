@@ -21,7 +21,8 @@ try:
 except Exception as dynamic_caption:
     print(f"⚠️ Dynamic Caption Invalid {dynamic_caption}")
 
-user_captions = {}
+# Assuming you have a list of admin user IDs stored in your bot's variables
+admin_user_ids = [1843754190 , 1270043632]  # Replace with your actual admin user IDs
 
 AutoCaptionBotV1 = pyrogram.Client(
     name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
@@ -52,41 +53,34 @@ def about_callback(bot, update):
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]))
 def set_caption_command(bot, update):
-    user_id = update.from_user.id if update.from_user else None
-    if user_id is not None:
+    # Check if the user is an administrator and has the correct admin ID
+    if (
+        update.from_user
+        and update.from_user.id in [admin.user.id for admin in bot.get_chat_members(update.chat.id, filter="administrators")]
+        and update.from_user.id in admin_user_ids
+    ):
         # Extract the caption from the command
         command_parts = update.text.split(" ", 1)
         if len(command_parts) > 1:
-            user_captions[user_id] = command_parts[1]
-            update.reply(f"Caption set to: {user_captions[user_id]}")
+            global dynamic_caption
+            dynamic_caption = command_parts[1]
+            update.reply(f"Caption set to: {dynamic_caption}")
         else:
             update.reply("Please provide a caption.")
     else:
-        update.reply("Unable to identify user.")
+        update.reply("You need to be an administrator with the correct ID to set the caption.")
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
-    if update.from_user and update.from_user.id in user_captions:
+    try:
         try:
-            user_caption = user_captions[update.from_user.id]
-            caption_text = user_caption.format(file_name=motech.file_name)
-            bot.edit_message_caption(
-                chat_id=update.chat.id,
-                message_id=update.message_id,
-                caption=caption_text
-            )
+            update.edit(dynamic_caption.format(file_name=motech.file_name))
         except pyrogram.errors.FloodWait as FloodWait:
             asyncio.sleep(FloodWait.value)
-            user_caption = user_captions[update.from_user.id]
-            caption_text = user_caption.format(file_name=motech.file_name)
-            bot.edit_message_caption(
-                chat_id=update.chat.id,
-                message_id=update.message_id,
-                caption=caption_text
-            )
-        except pyrogram.errors.MessageNotModified:
-            pass
+            update.edit(dynamic_caption.format(file_name=motech.file_name))
+    except pyrogram.errors.MessageNotModified:
+        pass
 
 def get_file_details(update: pyrogram.types.Message):
     if update.media:
