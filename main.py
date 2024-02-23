@@ -52,7 +52,7 @@ def about_callback(bot, update):
     bot = bot.get_me()
     update.message.edit(about_message.format(version=pyrogram.__version__, username=bot.mention), parse_mode=pyrogram.enums.ParseMode.HTML, disable_web_page_preview=True)
 
-@AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"] & pyrogram.filters.user(ADMIN))
+@AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]) & pyrogram.filters.user(ADMIN))
 def set_caption_command(bot, update):
     # Extract the caption from the command
     command_parts = update.text.split(" ", 1)
