@@ -17,16 +17,12 @@ try:
 except Exception as bot_token:
     print(f"⚠️ Bot Token Invalid {bot_token}")
 try:
-    admin_id = os.environ.get("admin_id", "1843754190")
-except Exception as admin:
-    print(f"⚠️ Admin Invalid {admin_id}")
-try:
     dynamic_caption = "`{file_name}`"
 except Exception as dynamic_caption:
     print(f"⚠️ Dynamic Caption Invalid {dynamic_caption}")
 
 AutoCaptionBotV1 = pyrogram.Client(
-    name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token, admin_id=admin_id)
+    name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
 
 start_message = """
 <b>👋Hello {}</b>
@@ -52,7 +48,7 @@ def about_callback(bot, update):
     bot = bot.get_me()
     update.message.edit(about_message.format(version=pyrogram.__version__, username=bot.mention), parse_mode=pyrogram.enums.ParseMode.HTML, disable_web_page_preview=True)
 
-@AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]) & pyrogram.filters.user(admin_id))
+@AutoCaptionBotV1.on_message(pyrogram.filters.private & pyrogram.filters.command(["setcaption"]))
 def set_caption_command(bot, update):
     # Extract the caption from the command
     command_parts = update.text.split(" ", 1)
@@ -101,4 +97,3 @@ print("Bot Created By https://t.me/xayoonara")
 
 AutoCaptionBotV1.run()
 
-    
